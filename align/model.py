@@ -5,8 +5,12 @@ from transformers import AlignProcessor, AlignModel
 processor = AlignProcessor.from_pretrained("kakaobrain/align-base")
 model = AlignModel.from_pretrained("kakaobrain/align-base")
 
-image_path = "images/house1_1.jpg"
-image = Image.open(requests.get(url, stream=True).raw)
+image_path = "../images/house1_1.png"
+image = Image.open(image_path)
+
+if image.mode != 'RGB':
+    image = image.convert('RGB')
+    
 candidate_labels = ["an image of a cat", "an image of a dog"]
 
 inputs = processor(text=candidate_labels, images=image, return_tensors="pt")
