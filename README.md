@@ -13,3 +13,5 @@ Run streamlit app with
 ```sh
 streamlit run streamlit_app/app.py
 ```
+
+![alt text](streamlit_app/streamlit_app_snapshot.png)
