@@ -4,11 +4,12 @@ from box import Box
 import numpy as np
 from utils.helpers import create_prompts, align_detect_amenity, clip_detect_amenity
 from align.model import align_processor, align_model
+from clip.model import clip_processor, clip_model
 
 
 config = Box.from_yaml(filename="config/config.yaml")
 amenities = config.amenities
-models = {'clip': (None, None),
+models = {'clip': (clip_processor, clip_model),
           'align': (align_processor, align_model)}
 
 st.write("# Amenity Detection")
@@ -40,10 +41,9 @@ if uploaded_file is not None:
                 
                 for pos, neg in zip(pos_prompts, neg_prompts):
                     if model_name == 'clip':
-                        predicted_prompt, probs = "meow meow", np.array([0.9, 0.1])
-                        # clip_detect_amenity(
-                        #     image=image, pos_prompt=pos, neg_prompt=neg, processor=processor, model=model
-                        # )
+                        predicted_prompt, probs = clip_detect_amenity(
+                             image=image, pos_prompt=pos, neg_prompt=neg, processor=processor, model=model
+                         )
                     elif model_name == 'align':
                         predicted_prompt, probs = align_detect_amenity(
                             image=image, pos_prompt=pos, neg_prompt=neg, processor=processor, model=model
