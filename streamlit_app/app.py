@@ -5,7 +5,9 @@ import numpy as np
 from utils.helpers import create_prompts, align_detect_amenity, clip_detect_amenity
 from align.model import align_processor, align_model
 from clip.model import clip_processor, clip_model
-
+from owl_vit.model import owlvit_processor, owlvit_model, mixin, plot_predictions
+import torch
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 config = Box.from_yaml(filename="config/config.yaml")
 amenities = config.amenities
@@ -54,3 +56,22 @@ if uploaded_file is not None:
                             st.write(f":green[{predicted_prompt.replace('there is ', '')} yes]")
                         else:
                             st.write(f":red[{predicted_prompt.replace('there is ', '')}]")
+
+        # Owl-ViT
+        st.header("Owl-ViT")
+        inputs = owlvit_processor(text=amenities, images=image, return_tensors="pt")
+        outputs = owlvit_model(**inputs)
+
+        image_size = owlvit_model.config.vision_config.image_size
+        image_resized = mixin.resize(image, image_size)
+        input_image = np.asarray(image_resized).astype(np.float32) / 255.0
+
+        logits = torch.max(outputs["logits"][0], dim=-1)
+        scores = torch.sigmoid(logits.values).cpu().detach().numpy()
+
+        # Get prediction labels and boundary boxes
+        labels = logits.indices.cpu().detach().numpy()
+        boxes = outputs["pred_boxes"][0].cpu().detach().numpy()
+        fig = plot_predictions(input_image, amenities, scores, boxes, labels)
+
+        st.pyplot(fig)
